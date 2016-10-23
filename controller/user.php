@@ -14,10 +14,11 @@ try{
 		switch ($paction) {
 			case "adduser";
 			{
-				$latitude = 23.23;
-				$precision = 25.88;
-				$read = 0;
-				$sql_stmt = 'INSERT INTO user (latitude, precis, status) VALUES (?, ?, ?)';
+				$latitude = $_POST['latitude'];
+				$precision = $_POST['precis'];
+				$read = $_POST['status'];
+				$now = time();
+				$sql_stmt = 'INSERT INTO user (latitude, precis, status, createtime) VALUES (?, ?, ?, now())';
 				$stmt = $pdo->prepare($sql_stmt);
 				$stmt->bindParam(1, $latitude);
 				$stmt->bindParam(2, $precision);
@@ -44,17 +45,35 @@ try{
 		switch ($gaction) {
 			case "showuser";
 			{
-				$id = $_GET['id'];
-				$start = 0;
-				$size = 10;
-				$sql_stmt = 'select * from user limit ?,?';
-				$stmt=$pdo->prepare($sql_stmt);
-				$stmt->bindParam(1, $start, PDO::PARAM_INT);
-				$stmt->bindParam(2, $size, PDO::PARAM_INT);
-				$stmt->execute();
-				$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-				exit(json_encode($result));
-
+//				$id = $_GET['id'];
+//				$start = 0;
+//				$size = 10;
+//				$sql_stmt = 'select * from user limit ?,?';
+//				$stmt=$pdo->prepare($sql_stmt);
+//				$stmt->bindParam(1, $start, PDO::PARAM_INT);
+//				$stmt->bindParam(2, $size, PDO::PARAM_INT);
+//				$stmt->execute();
+//				$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+//				exit(json_encode($result));
+				
+				$pq_curPage = $_GET["pq_curpage"];
+			    $pq_rPP=$_GET["pq_rpp"];
+			    $sql_stmt = "Select count(*) from user";
+			    $stmt=$pdo->prepare($sql_stmt);
+			    $stmt->execute();
+			    $total_Records = $stmt->fetchColumn();
+			    $skip = ($pq_rPP * ($pq_curPage - 1));
+			    if ($skip >= $total_Records)
+			    {        
+			        $pq_curPage = ceil($total_Records / $pq_rPP);
+			        $skip = ($pq_rPP * ($pq_curPage - 1));
+			    }
+			    $stmt = "select * from user limit ".$skip." , ".$pq_rPP;
+			    $stmt = $pdo->query($stmt); 
+			    $stmt->execute();   
+			    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			    $sb = "{\"totalRecords\":" . $total_Records . ",\"curPage\":" . $pq_curPage . ",\"data\":".json_encode($products)."}";
+				exit($sb);
 			}
 			break;
 			default:

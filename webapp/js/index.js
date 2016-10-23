@@ -7,15 +7,8 @@ $(document).ready(function() {
 			$("#testshow").html(result);
 		});
 	});
-	$("#testAdd").click(function() {
-		$.post("/locapp/controller/user.php", {'action':'adduser'}, function(result) {
-			$("#testshow").html(result);
-		});
-	});
-	$("#testDelete").click(function() {
-		var val = $("#delId").val();
-		$.post("/locapp/controller/user.php",{'action':'deleteuser', 'id':val},function(result){
-		    $("#testshow").html(result);
-		 });
+	$("#clean").click(function() {
+		$("#userid").val('');
+		$("#userpassid").val('');
 	});
 });
